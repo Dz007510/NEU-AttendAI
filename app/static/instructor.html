@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Instructor – NEU AttendAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --burg:#7b1f2e;--burg-dk:#5c1621;--burg-soft:#f9eaec;
+  --dark:#0f172a;--slate:#1e293b;--mid:#64748b;--light:#f8fafc;
+  --border:#e2e8f0;--white:#fff;
+  --green:#16a34a;--green-soft:#dcfce7;
+  --orange:#ea580c;--orange-soft:#fff7ed;
+  --red:#dc2626;--red-soft:#fef2f2;
+  --sw:220px;
+}
+body{font-family:'Inter',sans-serif;background:var(--light);color:var(--dark);min-height:100vh;display:flex}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--slate);min-height:100vh;display:flex;
+  flex-direction:column;flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:50}
+.sb-logo{padding:18px 14px;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:10px}
+.sb-icon{width:34px;height:34px;border-radius:9px;background:var(--burg);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-icon svg{width:18px;height:18px;color:#fff}
+.sb-name{font-size:12px;font-weight:700;color:#fff}
+.sb-sub{font-size:9px;color:rgba(255,255,255,.4)}
+.sb-sec{padding:10px 10px 3px;font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.3);letter-spacing:.8px;text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:7px;
+  margin:1px 5px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;
+  font-weight:500;transition:all .15s;text-decoration:none}
+.nav:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav.on{background:var(--burg);color:#fff}
+.nav svg{width:15px;height:15px;flex-shrink:0}
+.sb-bot{margin-top:auto;padding:10px 5px;border-top:1px solid rgba(255,255,255,.08)}
+.logout{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:7px;
+  cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;transition:all .15s}
+.logout:hover{color:#ff6b6b;background:rgba(220,38,38,.1)}
+.logout svg{width:15px;height:15px}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 22px;
+  height:58px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:12px;color:var(--mid)}
+.uav{width:32px;height:32px;border-radius:50%;background:var(--orange);color:#fff;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.uchip{display:flex;align-items:center;gap:8px}
+.un{font-size:12px;font-weight:600}
+.ur{font-size:10px;color:var(--mid)}
+.content{padding:22px;flex:1}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:16px}
+.sc .ic{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.sc .ic svg{width:18px;height:18px}
+.sc .n{font-size:26px;font-weight:800;color:var(--dark)}
+.sc .l{font-size:12px;color:var(--mid);margin-top:2px}
+.ic-r{background:var(--burg-soft)}.ic-r svg{color:var(--burg)}
+.ic-g{background:var(--green-soft)}.ic-g svg{color:var(--green)}
+.ic-o{background:var(--orange-soft)}.ic-o svg{color:var(--orange)}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:18px}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.card-head h2{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.card-head h2 svg{width:16px;height:16px;color:var(--burg)}
+.card-body{padding:18px}
+
+/* SMART SEARCH */
+.sw-wrap{position:relative;margin-bottom:8px}
+.sw-inp{width:100%;border:2px solid var(--border);border-radius:9px;padding:11px 14px;
+  font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
+.sw-inp:focus{border-color:var(--burg)}
+.sugs{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);
+  border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 20px rgba(0,0,0,.1);
+  z-index:200;max-height:210px;overflow-y:auto;display:none}
+.sugs.on{display:block}
+.sug{padding:10px 13px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background .1s}
+.sug:last-child{border-bottom:none}
+.sug:hover,.sug.sel{background:var(--burg-soft)}
+.sug-code{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.sug-badge{font-size:9px;font-weight:700;background:var(--green-soft);color:var(--green);padding:2px 6px;border-radius:7px}
+.sug-info{font-size:11px;color:var(--mid);margin-top:1px}
+
+/* FORM GRID */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}
+.fg-full{grid-column:1/-1}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--mid);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.field input{width:100%;border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 11px;font-size:13px;font-family:'Inter',sans-serif;outline:none;
+  transition:border .2s;color:var(--dark)}
+.field input:focus{border-color:var(--burg)}
+.field input.filled{background:var(--green-soft);border-color:#86efac;color:#166534;font-weight:600}
+.field input.manual{background:var(--orange-soft);border-color:#fdba74}
+.src-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:12px;margin-bottom:10px}
+.st-official{background:var(--green-soft);color:var(--green);border:1px solid #86efac}
+.st-manual{background:var(--orange-soft);color:var(--orange);border:1px solid #fdba74}
+
+.act-btn{display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;background:var(--burg);color:#fff;border:none;border-radius:9px;
+  padding:13px;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;transition:background .2s;margin-top:14px}
+.act-btn:hover{background:var(--burg-dk)}
+.act-btn svg{width:17px;height:17px}
+
+/* LIVE SESSION */
+.live-head{background:linear-gradient(135deg,var(--slate),#1e1b4b);
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.live-l{display:flex;align-items:center;gap:13px}
+.ldot{width:10px;height:10px;border-radius:50%;background:#4ade80;animation:pulse 1.4s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.lc-name{font-size:17px;font-weight:800;color:#fff}
+.lc-meta{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px}
+.live-r{display:flex;align-items:center;gap:12px}
+.ltimer .tl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.ltimer .tv{font-size:20px;font-weight:800;color:#fbbf24;font-variant-numeric:tabular-nums}
+.end-btn{display:flex;align-items:center;gap:5px;background:#dc2626;color:#fff;
+  border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif}
+.end-btn:hover{background:#b91c1c}
+.end-btn svg{width:13px;height:13px}
+
+.live-body{display:grid;grid-template-columns:1fr 340px}
+
+/* STUDENT LIST */
+.slp{padding:18px;border-right:1px solid var(--border)}
+.sl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sl-top h3{font-size:14px;font-weight:700}
+.chips{display:flex;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;
+  border-radius:12px;font-size:11px;font-weight:700}
+.cp{background:var(--green-soft);color:var(--green)}
+.ca{background:var(--red-soft);color:var(--red)}
+.cl{background:var(--orange-soft);color:var(--orange)}
+.si{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;
+  border-radius:9px;margin-bottom:5px;border:1px solid var(--border);transition:all .2s}
+.si.present{background:var(--green-soft);border-color:#86efac}
+.si.absent{background:var(--light);opacity:.75}
+.si.late{background:var(--orange-soft);border-color:#fdba74}
+.si-l{display:flex;align-items:center;gap:9px}
+.sav{width:32px;height:32px;border-radius:50%;background:var(--mid);color:#fff;
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sav.present{background:var(--green)}
+.sav.late{background:var(--orange)}
+.sn{font-size:13px;font-weight:600}
+.sid{font-size:11px;color:var(--mid)}
+.ss{font-size:11px;font-weight:700}
+.ss.present{color:var(--green)}
+.ss.absent{color:var(--mid)}
+.ss.late{color:var(--orange)}
+.st{font-size:10px;color:var(--mid)}
+
+/* QR SIDE */
+.qsp{padding:16px;display:flex;flex-direction:column;gap:14px}
+.qcard{background:var(--light);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.qlbl{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.5px;margin-bottom:11px}
+#adm-qr{display:inline-block;background:#fff;padding:7px;border-radius:7px;border:2px solid var(--border)}
+#adm-qr canvas,#adm-qr img{border-radius:4px}
+.qbar2-out{height:4px;background:var(--border);border-radius:4px;margin-top:8px;overflow:hidden}
+#qbar2{height:100%;background:var(--burg);border-radius:4px;transition:width 1s linear,background 1s}
+.qexp2{font-size:11px;color:var(--mid);text-align:center;margin-top:5px}
+
+.code6{background:var(--slate);border-radius:9px;padding:13px;text-align:center}
+.c6l{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.c6n{font-size:26px;font-weight:800;color:#4ade80;letter-spacing:7px;font-variant-numeric:tabular-nums}
+.c6s{font-size:10px;color:rgba(255,255,255,.4);margin-top:3px}
+
+.prog-card{background:linear-gradient(135deg,var(--green),#059669);border-radius:10px;padding:14px;color:#fff}
+.prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.prog-lbl{font-size:12px;opacity:.8}
+.prog-n{font-size:26px;font-weight:800;line-height:1}
+.prog-bar{height:6px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:#fff;border-radius:4px;transition:width .4s}
+.prog-sub{font-size:11px;opacity:.7;margin-top:5px}
+
+.exp-btn{display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;background:var(--slate);color:#fff;border:none;border-radius:8px;
+  padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.exp-btn:hover{background:var(--burg)}
+.exp-btn svg{width:13px;height:13px}
+.ref-btn2{width:100%;background:var(--burg-soft);border:1px solid #f5a0a8;
+  border-radius:8px;padding:7px;font-size:12px;font-weight:600;color:var(--burg);
+  cursor:pointer;font-family:'Inter',sans-serif}
+.ref-btn2:hover{background:#fecaca}
+</style>
+</head>
+<body>
+
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10A15 15 0 0 1 8 12 15 15 0 0 1 12 2z"/></svg></div>
+    <div><div class="sb-name">NEU AttendAI</div><div class="sb-sub">INSTRUCTOR PANEL</div></div>
+  </div>
+  <div class="sb-sec">Teaching</div>
+  <a class="nav on" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Attendance</a>
+  <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>My Schedule</a>
+  <a class="nav" href="admin.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Admin Panel</a>
+  <div class="sb-bot">
+    <div class="logout" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div><h1>Attendance Session</h1><p>Start a session or search your course</p></div>
+    <div class="uchip"><div class="uav" id="uav">IN</div><div><div class="un" id="uname">Instructor</div><div class="ur">Instructor Portal</div></div></div>
+  </div>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="sg">
+      <div class="sc"><div class="ic ic-r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div><div class="n" id="s-courses">0</div><div class="l">Courses in Timetable</div></div>
+      <div class="sc"><div class="ic ic-g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="n" id="s-today">0</div><div class="l">Sessions Today</div></div>
+      <div class="sc"><div class="ic ic-o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="n" id="s-att">—</div><div class="l">Last Attendance %</div></div>
+    </div>
+
+    <!-- SETUP CARD -->
+    <div class="card" id="setup-card">
+      <div class="card-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Attendance Session</h2></div>
+      <div class="card-body">
+        <label style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:7px">Search Course</label>
+        <div class="sw-wrap">
+          <input class="sw-inp" id="cs" type="text" placeholder="Type course code (e.g. C → CMSE322, ECC445…)"
+            oninput="onSearch(this.value)" onkeydown="onKey(event)" autocomplete="off"/>
+          <div class="sugs" id="sugs"></div>
+        </div>
+        <p style="font-size:12px;color:var(--mid);margin-bottom:4px">💡 From official NEU timetable. Enter manually if not listed.</p>
+
+        <div id="src-wrap" style="display:none">
+          <span class="src-tag st-official" id="src-chip">✓ From official timetable</span>
+        </div>
+
+        <div class="fg">
+          <div class="field fg-full"><label>Course Code *</label><input type="text" id="f-code" placeholder="e.g. CMSE322" oninput="onManual()"/></div>
+          <div class="field"><label>Room *</label><input type="text" id="f-room" placeholder="e.g. B-204"/></div>
+          <div class="field"><label>Day</label><input type="text" id="f-day" placeholder="e.g. Monday"/></div>
+          <div class="field"><label>Time Slot *</label><input type="text" id="f-slot" placeholder="e.g. 10:30-11:30"/></div>
+          <div class="field"><label>Instructor</label><input type="text" id="f-instr" placeholder="e.g. DERTUĞRUL"/></div>
+          <div class="field"><label>Date</label><input type="text" id="f-date" readonly style="background:#f9fafb"/></div>
+        </div>
+        <button class="act-btn" onclick="activate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Activate Session & Generate QR
+        </button>
+      </div>
+    </div>
+
+    <!-- LIVE SESSION -->
+    <div class="card" id="live-card" style="display:none">
+      <div class="live-head">
+        <div class="live-l">
+          <div class="ldot"></div>
+          <div><div class="lc-name" id="lc-name">CMSE322</div><div class="lc-meta" id="lc-meta">Room — · Period —</div></div>
+        </div>
+        <div class="live-r">
+          <div class="ltimer"><div class="tl">Session Time</div><div class="tv" id="sess-timer">00:00</div></div>
+          <button class="end-btn" onclick="endSession()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>End Session</button>
+        </div>
+      </div>
+      <div class="live-body">
+        <div class="slp">
+          <div class="sl-top">
+            <h3>Students — <span id="total-c">0</span> total</h3>
+            <div class="chips">
+              <span class="chip cp">✓ <span id="cnt-p">0</span></span>
+              <span class="chip ca">✗ <span id="cnt-a">0</span></span>
+              <span class="chip cl">● <span id="cnt-l">0</span></span>
+            </div>
+          </div>
+          <div id="slist"><div style="text-align:center;padding:28px;color:var(--mid);font-size:13px">Waiting for students to scan QR…</div></div>
+        </div>
+        <div class="qsp">
+          <div class="qcard">
+            <div class="qlbl">Attendance QR — Project for students</div>
+            <div id="adm-qr"></div>
+            <div class="qbar2-out"><div id="qbar2" style="width:100%"></div></div>
+            <div class="qexp2">Expires in <b id="acd">120</b>s</div>
+          </div>
+          <div class="code6">
+            <div class="c6l">Or enter this 6-digit code</div>
+            <div class="c6n" id="code6">------</div>
+            <div class="c6s">Scan QR or type the code</div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-top"><span class="prog-lbl">Attendance Progress</span><span style="font-size:12px;opacity:.8"><span id="pn">0</span>/<span id="pt">0</span></span></div>
+            <div class="prog-n"><span id="ppct">0</span>%</div>
+            <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+            <div class="prog-sub">of enrolled students checked in</div>
+          </div>
+          <button class="ref-btn2" onclick="admRefresh()">🔄 Refresh QR Now</button>
+          <button class="exp-btn" onclick="exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Auth ──
+(function(){
+  if(!sessionStorage.getItem('neu_role')){window.location.href='login.html';return;}
+  var id=sessionStorage.getItem('neu_id')||'instructor1';
+  document.getElementById('uname').textContent=sessionStorage.getItem('neu_name')||id;
+  document.getElementById('uav').textContent=id.slice(0,2).toUpperCase();
+})();
+function logout(){sessionStorage.clear();window.location.href='login.html';}
+
+// ── Timetable ──
+var TT_FB=[
+  {course_code:"ECC445", instructor:"JBIDOKO",   room:"VT 1 D01", day:"Tuesday",   time_slot:"15:30-16:30",source:"official_excel"},
+  {course_code:"ECC445", instructor:"JBIDOKO",   room:"VT 1 D02", day:"Friday",    time_slot:"11:30-12:30",source:"official_excel"},
+  {course_code:"CMSE322",instructor:"DERTUĞRUL", room:"B-204",    day:"Monday",    time_slot:"10:30-11:30",source:"official_excel"},
+  {course_code:"CMSE322",instructor:"DERTUĞRUL", room:"B-204",    day:"Wednesday", time_slot:"10:30-11:30",source:"official_excel"},
+  {course_code:"CMSE344",instructor:"DARIFLER",  room:"C-101",    day:"Tuesday",   time_slot:"13:30-14:30",source:"official_excel"},
+  {course_code:"CMSE326",instructor:"HAYBAY",    room:"A-302",    day:"Monday",    time_slot:"09:30-10:30",source:"official_excel"},
+  {course_code:"CMPE342",instructor:"YBITIRIM",  room:"Lab-1",    day:"Thursday",  time_slot:"10:30-11:30",source:"official_excel"},
+];
+function getTT(){var r=sessionStorage.getItem('neu_timetable');return r?JSON.parse(r):TT_FB;}
+var TT=getTT();
+document.getElementById('s-courses').textContent=[...new Set(TT.map(function(s){return s.course_code;}))].length;
+document.getElementById('f-date').value=new Date().toLocaleDateString('en-GB');
+
+// ── Search ──
+var sugData=[], sugIdx=-1;
+function onSearch(q){
+  if(!q.trim()){hideSug();return;}
+  sugData=[...new Map(TT.filter(function(s){return s.course_code.toLowerCase().includes(q.toLowerCase());})
+    .map(function(s){return[s.course_code,s];})).values()].slice(0,8);
+  var box=document.getElementById('sugs');
+  if(!sugData.length){hideSug();return;}
+  box.innerHTML=sugData.map(function(s,i){
+    return '<div class="sug" onmousedown="pickSug('+i+')">'
+      +'<div class="sug-code">'+s.course_code+'<span class="sug-badge">✓ Excel</span></div>'
+      +'<div class="sug-info">📅 '+s.day+' · '+s.time_slot+' · 🏫 '+s.room+'</div></div>';
+  }).join('');
+  box.className='sugs on';
+  sugIdx=-1;
+}
+function onKey(e){
+  var items=document.querySelectorAll('.sug');
+  if(e.key==='ArrowDown'){sugIdx=Math.min(sugIdx+1,items.length-1);items.forEach(function(el,i){el.classList.toggle('sel',i===sugIdx);});}
+  else if(e.key==='ArrowUp'){sugIdx=Math.max(sugIdx-1,0);items.forEach(function(el,i){el.classList.toggle('sel',i===sugIdx);});}
+  else if(e.key==='Enter'&&sugIdx>=0)pickSug(sugIdx);
+  else if(e.key==='Escape')hideSug();
+}
+function hideSug(){document.getElementById('sugs').className='sugs';}
+function pickSug(i){
+  hideSug();
+  var s=sugData[i];
+  document.getElementById('cs').value=s.course_code;
+  fill('f-code',s.course_code,true); fill('f-room',s.room,true);
+  fill('f-day',s.day,true); fill('f-slot',s.time_slot,true); fill('f-instr',s.instructor||'',true);
+  document.getElementById('src-wrap').style.display='';
+  document.getElementById('src-chip').className='src-tag st-official';
+  document.getElementById('src-chip').textContent='✓ From official timetable (official_excel)';
+}
+function fill(id,val,auto){var el=document.getElementById(id);el.value=val||'';el.className=auto?'filled':'';}
+function onManual(){
+  document.getElementById('src-wrap').style.display='';
+  document.getElementById('src-chip').className='src-tag st-manual';
+  document.getElementById('src-chip').textContent='✎ Manual entry (manual_input)';
+}
+document.addEventListener('click',function(e){if(!e.target.closest('.sw-wrap'))hideSug();});
+
+// ── QR ──
+var QR_DUR=120, admTime=QR_DUR, admTimer=null;
+function gen6(){return Math.floor(100000+Math.random()*900000).toString();}
+function admRefresh(){
+  var code=document.getElementById('f-code').value||'SESSION';
+  var r=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  var tok='neu://attend?course='+code+'&token='+r+'&ts='+Date.now();
+  document.getElementById('adm-qr').innerHTML='';
+  new QRCode(document.getElementById('adm-qr'),{text:tok,width:130,height:130,
+    colorDark:'#0f172a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+  document.getElementById('code6').textContent=gen6();
+  admTime=QR_DUR;
+  document.getElementById('qbar2').style.cssText='width:100%;background:#7b1f2e';
+}
+function startAdmTimer(){
+  if(admTimer)clearInterval(admTimer);
+  admTimer=setInterval(function(){
+    admTime--;
+    document.getElementById('acd').textContent=admTime;
+    document.getElementById('qbar2').style.width=(admTime/QR_DUR*100)+'%';
+    if(admTime<=20)document.getElementById('qbar2').style.background='#ea580c';
+    if(admTime<=0)admRefresh();
+  },1000);
+}
+
+// ── Session timer ──
+var sessSecs=0, sessTimer=null;
+function startSessTimer(){
+  sessSecs=0;
+  sessTimer=setInterval(function(){
+    sessSecs++;
+    var m=String(Math.floor(sessSecs/60)).padStart(2,'0');
+    var s=String(sessSecs%60).padStart(2,'0');
+    document.getElementById('sess-timer').textContent=m+':'+s;
+  },1000);
+}
+
+// ── Activate ──
+var tableData=[], dataLoop=null;
+function activate(){
+  var code=document.getElementById('f-code').value.trim();
+  var room=document.getElementById('f-room').value.trim();
+  var slot=document.getElementById('f-slot').value.trim();
+  if(!code||!room||!slot){alert('Please fill Course Code, Room, and Time Slot.');return;}
+
+  document.getElementById('setup-card').style.display='none';
+  document.getElementById('live-card').style.display='';
+  document.getElementById('lc-name').textContent=code;
+  document.getElementById('lc-meta').textContent='🏫 '+room+' · 🕐 '+slot;
+
+  admRefresh(); startAdmTimer(); startSessTimer();
+  loadAtt(); dataLoop=setInterval(loadAtt,5000);
+}
+
+function endSession(){
+  if(!confirm('End the current session?'))return;
+  clearInterval(admTimer); clearInterval(sessTimer); clearInterval(dataLoop);
+  document.getElementById('live-card').style.display='none';
+  document.getElementById('setup-card').style.display='';
+}
+
+// ── Demo data ──
+var DEMO={
+  CMSE322:[
+    {id:"24700035",name:"Lyan Bashmal",  status:"present",time:"10:31",type:"Official"},
+    {id:"24700036",name:"Ahmed Ali",     status:"present",time:"10:32",type:"Official"},
+    {id:"24700037",name:"Sara Omar",     status:"absent", time:"—",    type:"Official"},
+    {id:"24700038",name:"Karim Hassan",  status:"absent", time:"—",    type:"Official"},
+    {id:"24700039",name:"Nour Khalid",   status:"present",time:"10:33",type:"Official"},
+    {id:"24799001",name:"Youssef Tarig", status:"present",time:"10:35",type:"Late Registration"},
+  ],
+  ECC445:[
+    {id:"24700100",name:"Fatimah M.",  status:"present",time:"15:31",type:"Official"},
+    {id:"24700101",name:"Ali Hassan",  status:"absent", time:"—",    type:"Official"},
+    {id:"24700102",name:"Reem Salem",  status:"present",time:"15:33",type:"Official"},
+    {id:"24799002",name:"Omar Said",   status:"present",time:"15:40",type:"Late Registration"},
+  ],
+};
+
+function loadAtt(){
+  var code=document.getElementById('f-code').value.trim();
+  var token=sessionStorage.getItem('neu_token')||'';
+  fetch('/attendance/session-report/'+code,{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.ok?r.json():Promise.reject();})
+    .then(function(d){renderStudents(d.map(function(s){return{id:s.id,name:s.id,status:s.color==='green'?'present':s.color==='orange'?'late':'absent',time:s.time||'—',type:s.type||'Official'};}));})
+    .catch(function(){renderStudents(DEMO[code]||[]);});
+}
+
+function renderStudents(data){
+  tableData=data;
+  var p=0,a=0,l=0;
+  var html='';
+  data.forEach(function(s){
+    if(s.status==='present')p++;else if(s.status==='late')l++;else a++;
+    var ini=s.name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    html+='<div class="si '+s.status+'">'
+      +'<div class="si-l"><div class="sav '+s.status+'">'+ini+'</div>'
+      +'<div><div class="sn">'+s.name+'</div><div class="sid">'+s.id+'</div></div></div>'
+      +'<div><div class="ss '+s.status+'">'+(s.status==='present'?'✓ Present':s.status==='late'?'● Late Reg':'✗ Not yet')+'</div>'
+      +'<div class="st">'+s.time+'</div></div></div>';
+  });
+  document.getElementById('slist').innerHTML=html||'<div style="text-align:center;padding:28px;color:var(--mid);font-size:13px">No check-ins yet.</div>';
+  document.getElementById('cnt-p').textContent=p;
+  document.getElementById('cnt-a').textContent=a;
+  document.getElementById('cnt-l').textContent=l;
+  document.getElementById('total-c').textContent=data.length;
+  var tot=p+a+l, pct=tot?Math.round((p+l)/tot*100):0;
+  document.getElementById('pn').textContent=p+l;
+  document.getElementById('pt').textContent=tot;
+  document.getElementById('ppct').textContent=pct;
+  document.getElementById('pfill').style.width=pct+'%';
+  if(tot>0)document.getElementById('s-att').textContent=pct+'%';
+}
+
+function exportCSV(){
+  if(!tableData.length){alert('No data.');return;}
+  var code=document.getElementById('f-code').value;
+  var lines=['Student ID,Name,Status,Type,Time'];
+  tableData.forEach(function(s){lines.push(s.id+','+s.name+','+s.status+','+s.type+','+s.time);});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
+  a.download='attendance_'+code+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+</script>
+</body>
+</html>

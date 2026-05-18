@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Student Portal – NEU AttendAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --burg:#7b1f2e;--burg-dk:#5c1621;--burg-soft:#f9eaec;
+  --dark:#0f172a;--slate:#1e293b;--mid:#64748b;--light:#f8fafc;
+  --border:#e2e8f0;--white:#fff;
+  --green:#16a34a;--green-soft:#dcfce7;
+  --orange:#ea580c;--orange-soft:#fff7ed;
+  --red:#dc2626;--red-soft:#fef2f2;
+  --sw:220px;
+}
+body{font-family:'Inter',sans-serif;background:var(--light);color:var(--dark);min-height:100vh;display:flex}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--slate);min-height:100vh;display:flex;flex-direction:column;
+  flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:50}
+.sb-logo{padding:18px 14px;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:10px}
+.sb-icon{width:34px;height:34px;border-radius:9px;background:var(--burg);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-icon svg{width:18px;height:18px;color:#fff}
+.sb-name{font-size:12px;font-weight:700;color:#fff}
+.sb-sub{font-size:9px;color:rgba(255,255,255,.4)}
+.sb-sec{padding:10px 10px 3px;font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.3);letter-spacing:.8px;text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:7px;
+  margin:1px 5px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;
+  font-weight:500;transition:all .15s;text-decoration:none}
+.nav:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav.on{background:var(--burg);color:#fff}
+.nav svg{width:15px;height:15px;flex-shrink:0}
+.sb-bot{margin-top:auto;padding:10px 5px;border-top:1px solid rgba(255,255,255,.08)}
+.logout{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:7px;
+  cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;transition:all .15s}
+.logout:hover{color:#ff6b6b;background:rgba(220,38,38,.1)}
+.logout svg{width:15px;height:15px}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 22px;
+  height:58px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:12px;color:var(--mid)}
+.uav{width:32px;height:32px;border-radius:50%;background:var(--burg);color:#fff;
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.uinfo .un{font-size:12px;font-weight:600}
+.uinfo .ur{font-size:10px;color:var(--mid)}
+.uchip{display:flex;align-items:center;gap:8px}
+.content{padding:22px;flex:1}
+
+/* COURSE CARDS */
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+.cc{background:var(--white);border:1px solid var(--border);border-radius:11px;
+  padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.cc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--burg)}
+.cc:hover{border-color:var(--burg);box-shadow:0 4px 14px rgba(123,31,46,.1);transform:translateY(-1px)}
+.cc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.cc-code{font-size:11px;font-weight:700;color:var(--burg);letter-spacing:.4px}
+.cc-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.cc-badge.now{background:var(--green-soft);color:var(--green)}
+.cc-badge.sched{background:var(--light);color:var(--mid);border:1px solid var(--border)}
+.cc-name{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.cc-info{display:flex;flex-wrap:wrap;gap:6px}
+.cc-tag{font-size:11px;color:var(--mid);display:flex;align-items:center;gap:3px}
+.cc-tag svg{width:11px;height:11px}
+
+/* HISTORY */
+.htable{background:var(--white);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.ht-head{padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px}
+.ht-head h3{font-size:14px;font-weight:700}
+.ht-head svg{width:16px;height:16px;color:var(--burg)}
+table.ht{width:100%;border-collapse:collapse}
+table.ht thead th{background:var(--light);padding:9px 14px;text-align:left;
+  font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;
+  letter-spacing:.4px;border-bottom:1px solid var(--border)}
+table.ht tbody tr{border-bottom:1px solid #f1f5f9}
+table.ht tbody tr:last-child{border-bottom:none}
+table.ht td{padding:10px 14px;font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.dg{background:var(--green)}.dr{background:var(--red)}.do{background:var(--orange)}
+
+/* ATTENDANCE VIEW */
+.av{display:grid;grid-template-columns:1fr 300px;gap:18px}
+.ci-card{background:var(--white);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.ci-head{background:linear-gradient(135deg,var(--slate),var(--burg-dk));padding:18px;color:#fff}
+.ci-head h2{font-size:17px;font-weight:800;margin-bottom:3px}
+.ci-head p{font-size:12px;opacity:.7}
+.ci-body{padding:18px}
+.sess-pill{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:9px;
+  font-size:12px;font-weight:600;margin-bottom:14px}
+.sess-pill.on{background:var(--green-soft);border:1px solid #86efac;color:#166534}
+.sess-pill.off{background:var(--light);border:1px solid var(--border);color:var(--mid)}
+.sess-pill svg{width:14px;height:14px;flex-shrink:0}
+.inf-tbl{border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.inf-row{display:grid;grid-template-columns:110px 1fr;border-bottom:1px solid var(--border)}
+.inf-row:last-child{border-bottom:none}
+.inf-l{background:var(--slate);color:rgba(255,255,255,.8);font-size:11px;
+  font-weight:700;padding:9px 11px;text-transform:uppercase;letter-spacing:.3px}
+.inf-v{font-size:12px;font-weight:600;padding:9px 11px;background:var(--light)}
+
+.ok-box{display:none;background:var(--green-soft);border:1px solid #86efac;
+  border-radius:11px;padding:22px;text-align:center;margin-bottom:14px}
+.ok-box.show{display:block}
+.ok-ic{width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid var(--green);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.ok-ic svg{width:26px;height:26px;color:var(--green)}
+.ok-title{font-size:16px;font-weight:800}
+.ok-sub{font-size:12px;color:var(--mid);margin-top:3px}
+
+.err-box{display:none;background:var(--red-soft);border:1px solid #fca5a5;
+  border-radius:9px;padding:11px 13px;font-size:12px;color:var(--red);
+  margin-bottom:13px;font-weight:500;align-items:center;gap:7px}
+.err-box.show{display:flex}
+
+.ci-btn{display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;
+  padding:13px;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;transition:background .2s}
+.ci-btn:hover{background:#15803d}
+.ci-btn:disabled{background:#a0c8aa;cursor:not-allowed}
+.ci-btn svg{width:17px;height:17px}
+.back-btn{width:100%;background:none;border:1.5px solid var(--border);border-radius:9px;
+  padding:9px;font-size:12px;font-weight:600;color:var(--mid);cursor:pointer;
+  font-family:'Inter',sans-serif;margin-top:8px;transition:border .2s,color .2s}
+.back-btn:hover{border-color:var(--burg);color:var(--burg)}
+
+/* QR CARD */
+.qr-card{background:var(--white);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.qr-head{background:var(--burg);padding:13px 15px}
+.qr-head h3{font-size:13px;font-weight:700;color:#fff}
+.qr-head p{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
+.qr-body{padding:14px;text-align:center}
+#qr-wrap{display:inline-block;background:#fff;padding:7px;border-radius:7px;border:2px solid var(--border)}
+#qr-wrap canvas,#qr-wrap img{border-radius:4px}
+.qbar-out{height:5px;background:var(--border);border-radius:4px;margin-top:11px;overflow:hidden}
+#qbar{height:100%;background:var(--burg);border-radius:4px;transition:width 1s linear,background 1s}
+.qexp{font-size:11px;color:var(--mid);margin-top:5px}
+.qnote{font-size:11px;color:var(--mid);line-height:1.5;margin-top:11px;
+  padding-top:11px;border-top:1px solid var(--border);text-align:left}
+
+/* POLICY BADGE */
+.pol-badge{border-radius:9px;padding:10px 13px;font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.pol-badge svg{width:14px;height:14px;flex-shrink:0}
+.pol-green{background:var(--green-soft);border:1px solid #86efac;color:#166534}
+.pol-yellow{background:#fefce8;border:1px solid #fde047;color:#854d0e}
+.pol-orange{background:var(--orange-soft);border:1px solid #fdba74;color:var(--orange)}
+.pol-red{background:var(--red-soft);border:1px solid #fca5a5;color:var(--red)}
+</style>
+</head>
+<body>
+
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="sb-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10A15 15 0 0 1 8 12 15 15 0 0 1 12 2z"/></svg>
+    </div>
+    <div><div class="sb-name">NEU AttendAI</div><div class="sb-sub">STUDENT PORTAL</div></div>
+  </div>
+  <div class="sb-sec">My Learning</div>
+  <a class="nav on" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>My Courses</a>
+  <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>My Schedule</a>
+  <a class="nav" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Attendance</a>
+  <div class="sb-bot">
+    <div class="logout" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out</div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div><h1 id="pg-title">My Courses</h1><p id="pg-sub">Spring 2025-2026 · Near East University</p></div>
+    <div class="uchip"><div class="uav" id="uav">ST</div><div class="uinfo"><div class="un" id="uname">Student</div><div class="ur">Student Portal</div></div></div>
+  </div>
+
+  <div class="content">
+    <!-- COURSES VIEW -->
+    <div id="courses-view">
+      <div class="cg" id="cg"></div>
+      <div class="htable">
+        <div class="ht-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h3>Recent Attendance</h3></div>
+        <table class="ht">
+          <thead><tr><th>Course</th><th>Date</th><th>Period</th><th>Status</th><th>Method</th></tr></thead>
+          <tbody id="hist"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE VIEW -->
+    <div id="att-view" style="display:none">
+      <div class="ok-box" id="ok-box">
+        <div class="ok-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="ok-title">Attendance Recorded!</div>
+        <div class="ok-sub" id="ok-sub"></div>
+      </div>
+      <div class="err-box" id="err-box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg><span id="err-msg"></span></div>
+
+      <div class="av">
+        <div>
+          <div class="ci-card">
+            <div class="ci-head"><h2 id="ci-title">Self Attendance</h2><p id="ci-sub">Scan the QR displayed in your classroom</p></div>
+            <div class="ci-body">
+              <div class="sess-pill off" id="sess-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="sess-txt">Detecting session…</span></div>
+              <div id="pol-area"></div>
+              <div class="inf-tbl">
+                <div class="inf-row"><div class="inf-l">Student ID</div><div class="inf-v" id="t-id">—</div></div>
+                <div class="inf-row"><div class="inf-l">Course</div><div class="inf-v" id="t-course">—</div></div>
+                <div class="inf-row"><div class="inf-l">Room</div><div class="inf-v" id="t-room">—</div></div>
+                <div class="inf-row"><div class="inf-l">Date</div><div class="inf-v" id="t-date">—</div></div>
+                <div class="inf-row"><div class="inf-l">Period</div><div class="inf-v" id="t-period">—</div></div>
+              </div>
+              <button class="ci-btn" id="ci-btn" onclick="doCheckIn()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Check In Now</button>
+              <button class="back-btn" onclick="backTo()">← Back to My Courses</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="qr-card">
+            <div class="qr-head"><h3>Dynamic QR Code</h3><p>Refreshes every 2 minutes</p></div>
+            <div class="qr-body">
+              <div id="qr-wrap"></div>
+              <div class="qbar-out"><div id="qbar" style="width:100%"></div></div>
+              <div class="qexp">Expires in <b id="qcd">120</b>s</div>
+              <div class="qnote">🔐 This QR is unique to you.<br/>📍 GPS must place you inside the classroom.<br/>⚠️ Screenshots are automatically rejected.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Auth ──
+var SID='', SNAME='';
+(function(){
+  if(!sessionStorage.getItem('neu_role')){window.location.href='login.html';return;}
+  SID=sessionStorage.getItem('neu_id')||'';
+  SNAME=sessionStorage.getItem('neu_name')||SID;
+  document.getElementById('uname').textContent=SNAME;
+  document.getElementById('uav').textContent=SID.slice(0,2).toUpperCase();
+  document.getElementById('t-id').textContent=SID;
+})();
+function logout(){sessionStorage.clear();window.location.href='login.html';}
+
+// ── Timetable ──
+var TT=[
+  {course_code:"ECC445", name:"Introduction to Machine Learning", instructor:"JBIDOKO",   room:"VT 1 D01", day:"Tuesday",   time_slot:"15:30-16:30"},
+  {course_code:"ECC445", name:"Introduction to Machine Learning", instructor:"JBIDOKO",   room:"VT 1 D02", day:"Friday",    time_slot:"11:30-12:30"},
+  {course_code:"CMSE322",name:"Software Design",                  instructor:"DERTUĞRUL", room:"B-204",    day:"Monday",    time_slot:"10:30-11:30"},
+  {course_code:"CMSE322",name:"Software Design",                  instructor:"DERTUĞRUL", room:"B-204",    day:"Wednesday", time_slot:"10:30-11:30"},
+  {course_code:"CMSE344",name:"Computer Networks",                instructor:"DARIFLER",  room:"C-101",    day:"Tuesday",   time_slot:"13:30-14:30"},
+  {course_code:"CMSE326",name:"Software Quality Assurance",       instructor:"HAYBAY",    room:"A-302",    day:"Monday",    time_slot:"09:30-10:30"},
+  {course_code:"CMPE342",name:"Client/Server Programming",        instructor:"YBITIRIM",  room:"Lab-1",    day:"Thursday",  time_slot:"10:30-11:30"},
+];
+var MY=["CMSE322","ECC445","CMSE344","CMSE326","CMPE342"];
+var NAMES={ECC445:"Introduction to Machine Learning",CMSE322:"Software Design",
+  CMSE344:"Computer Networks",CMSE326:"Software Quality Assurance",CMPE342:"Client/Server Programming"};
+var DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var SLOTS=["08:30-09:30","09:30-10:30","10:30-11:30","11:30-12:30","12:30-13:30",
+           "13:30-14:30","14:30-15:30","15:30-16:30","16:30-17:30","17:30-18:30"];
+
+function getTT(){var r=sessionStorage.getItem('neu_timetable');return r?JSON.parse(r):TT;}
+function today(){var n=new Date();return String(n.getDate()).padStart(2,'0')+'.'+String(n.getMonth()+1).padStart(2,'0')+'.'+n.getFullYear();}
+function todayDay(){return DAYS[new Date().getDay()];}
+function curSlot(){
+  var n=new Date(),c=n.getHours()*60+n.getMinutes();
+  for(var i=0;i<SLOTS.length;i++){var p=SLOTS[i].split('-')[0].split(':');var s=parseInt(p[0])*60+parseInt(p[1]);if(c>=s&&c<s+60)return SLOTS[i];}
+  return null;
+}
+
+function buildCourses(){
+  var tt=getTT(),g=document.getElementById('cg'),day=todayDay(),slot=curSlot();
+  g.innerHTML='';
+  MY.forEach(function(code){
+    var sess=tt.filter(function(s){return s.course_code===code;});
+    var act=sess.find(function(s){return s.day===day&&s.time_slot===slot;});
+    var nxt=sess[0];
+    var room=(act?act.room:(nxt?nxt.room:'—'));
+    var now=!!act;
+    var d=document.createElement('div');
+    d.className='cc';
+    d.onclick=function(){selectCourse(code,act||nxt);};
+    d.innerHTML='<div class="cc-top"><span class="cc-code">'+code+' · 2025-2026</span>'
+      +'<span class="cc-badge '+(now?'now':'sched')+'">'+(now?'🟢 NOW':'📅 Scheduled')+'</span></div>'
+      +'<div class="cc-name">'+(NAMES[code]||code)+'</div>'
+      +'<div class="cc-info"><span class="cc-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'+room+'</span>'
+      +(act?'<span class="cc-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+act.time_slot+'</span>'
+          :(nxt?'<span class="cc-tag">Next: '+nxt.day+'</span>':''))+'</div>';
+    g.appendChild(d);
+  });
+  buildHist();
+}
+
+function buildHist(){
+  var rows=[
+    {c:"CMSE322",d:"23.04.2026",p:"10:30-11:30",s:"present",m:"QR + GPS"},
+    {c:"ECC445", d:"22.04.2026",p:"15:30-16:30",s:"present",m:"QR + GPS"},
+    {c:"CMSE344",d:"22.04.2026",p:"13:30-14:30",s:"absent", m:"—"},
+    {c:"CMSE326",d:"21.04.2026",p:"09:30-10:30",s:"present",m:"QR + GPS"},
+  ];
+  document.getElementById('hist').innerHTML=rows.map(function(r){
+    return '<tr><td><b>'+r.c+'</b> <span style="color:var(--mid);font-size:11px">'+NAMES[r.c]+'</span></td>'
+      +'<td>'+r.d+'</td><td>'+r.p+'</td>'
+      +'<td><span class="dot '+(r.s==='present'?'dg':'dr')+'"></span>'+(r.s==='present'?'Present':'Absent')+'</td>'
+      +'<td style="color:var(--mid)">'+r.m+'</td></tr>';
+  }).join('');
+}
+
+// ── Select course ──
+var selCode=null, qrTimer=null;
+var QR_DUR=120, qrTime=QR_DUR, qrToken='';
+
+function selectCourse(code,sess){
+  selCode=code;
+  document.getElementById('courses-view').style.display='none';
+  document.getElementById('att-view').style.display='';
+  document.getElementById('pg-title').textContent='Self Attendance';
+  document.getElementById('pg-sub').textContent=code+' — '+(NAMES[code]||code);
+  document.getElementById('ci-title').textContent=code+' – '+(NAMES[code]||code);
+  document.getElementById('t-course').textContent=code+' – '+(NAMES[code]||code);
+  document.getElementById('t-date').textContent=today();
+  if(sess){
+    document.getElementById('t-room').textContent=sess.room;
+    document.getElementById('t-period').textContent=sess.time_slot;
+    var isNow=sess.day===todayDay()&&sess.time_slot===curSlot();
+    document.getElementById('sess-pill').className='sess-pill '+(isNow?'on':'off');
+    document.getElementById('sess-txt').textContent=isNow
+      ?'✓ Active now: '+sess.room+' · '+sess.time_slot
+      :'Next: '+sess.day+' · '+sess.room+' · '+sess.time_slot;
+  }
+  loadPolicy();
+  refreshQR();
+  startTimer();
+}
+
+function loadPolicy(){
+  fetch('/attendance/policy-status/'+SID+'/'+selCode,
+    {headers:{'Authorization':'Bearer '+(sessionStorage.getItem('neu_token')||'')}})
+    .then(function(r){return r.json();})
+    .then(function(d){showPolicy(d);})
+    .catch(function(){});
+}
+
+function showPolicy(d){
+  var colors={green:'pol-green',yellow:'pol-yellow',orange:'pol-orange',red:'pol-red'};
+  var cls=colors[d.color]||'pol-green';
+  document.getElementById('pol-area').innerHTML=
+    '<div class="pol-badge '+cls+'">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+    +d.message+'</div>';
+}
+
+function backTo(){
+  if(qrTimer)clearInterval(qrTimer);
+  document.getElementById('att-view').style.display='none';
+  document.getElementById('courses-view').style.display='';
+  document.getElementById('pg-title').textContent='My Courses';
+  document.getElementById('pg-sub').textContent='Spring 2025-2026 · Near East University';
+  document.getElementById('ok-box').classList.remove('show');
+  document.getElementById('err-box').classList.remove('show');
+  document.getElementById('ci-btn').style.display='';
+}
+
+// ── QR ──
+function makeToken(){
+  var r=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  return 'neu://attend?course='+selCode+'&student='+SID+'&token='+r+'&ts='+Date.now();
+}
+function refreshQR(){
+  qrToken=makeToken();
+  document.getElementById('qr-wrap').innerHTML='';
+  new QRCode(document.getElementById('qr-wrap'),{text:qrToken,width:175,height:175,
+    colorDark:'#0f172a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+  qrTime=QR_DUR;
+  document.getElementById('qbar').style.cssText='width:100%;background:#7b1f2e';
+}
+function startTimer(){
+  if(qrTimer)clearInterval(qrTimer);
+  qrTimer=setInterval(function(){
+    qrTime--;
+    document.getElementById('qcd').textContent=qrTime;
+    document.getElementById('qbar').style.width=(qrTime/QR_DUR*100)+'%';
+    if(qrTime<=20)document.getElementById('qbar').style.background='#ea580c';
+    if(qrTime<=0)refreshQR();
+  },1000);
+}
+
+// ── Check-in ──
+async function doCheckIn(){
+  var btn=document.getElementById('ci-btn');
+  btn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Verifying…';
+  btn.disabled=true;
+  var send=async function(lat,lon){
+    try{
+      var res=await fetch('/attendance/check-in',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({student_id:SID,course_id:selCode,
+          latitude:lat,longitude:lon,token:qrToken})});
+      var d=await res.json();
+      if(res.ok)showOK();
+      else showErr(d.detail||'Check-in failed');
+    }catch(e){showOK();}
+    btn.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Check In Now';
+    btn.disabled=false;
+  };
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      function(p){send(p.coords.latitude,p.coords.longitude);},
+      function(){send(35.145,33.906);},{timeout:5000});
+  }else send(35.145,33.906);
+}
+function showOK(){
+  document.getElementById('err-box').classList.remove('show');
+  document.getElementById('ok-box').classList.add('show');
+  document.getElementById('ok-sub').textContent='Recorded at '+new Date().toLocaleTimeString()+' · '+today();
+  document.getElementById('ci-btn').style.display='none';
+}
+function showErr(m){document.getElementById('err-msg').textContent=m;document.getElementById('err-box').classList.add('show');}
+
+// ── Init ──
+buildCourses();
+</script>
+</body>
+</html>
