@@ -92,7 +92,7 @@ Download from [git-scm.com](https://git-scm.com/) if you do not have it.
 ```bash
 git clone https://github.com/Dz007510/NEU-AttendAI.git
 
-then write: cd NEU-AttendAI
+#then write: cd NEU-AttendAI
 ```
 
 ### Step 2 — Create a virtual environment
