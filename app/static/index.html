@@ -243,14 +243,14 @@ table.ht td{padding:10px 14px;font-size:12px}
 // ── Auth ──
 var SID='', SNAME='';
 (function(){
-  if(!sessionStorage.getItem('neu_role')){window.location.href='login.html';return;}
+  if(!sessionStorage.getItem('neu_role')){window.location.href='/login';return;}
   SID=sessionStorage.getItem('neu_id')||'';
   SNAME=sessionStorage.getItem('neu_name')||SID;
   document.getElementById('uname').textContent=SNAME;
   document.getElementById('uav').textContent=SID.slice(0,2).toUpperCase();
   document.getElementById('t-id').textContent=SID;
 })();
-function logout(){sessionStorage.clear();window.location.href='login.html';}
+function logout(){sessionStorage.clear();window.location.href='/login';}
 
 // ── Timetable ──
 var TT=[
